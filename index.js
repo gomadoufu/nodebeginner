@@ -1,8 +1,13 @@
-const server = require('./server.js');
-const router = require('./router.js');
-const requestHandlers = require('./requestHandlers.js');
+import { start as serverStart } from './server.js';
+import { route as router } from './router.js';
+import {
+  start as handleStart,
+  upload as handleUpload,
+  show as handleShow,
+} from './requestHandlers.js';
 const handle = new Map();
-handle.set('/', requestHandlers.start);
-handle.set('/start', requestHandlers.start);
-handle.set('/upload', requestHandlers.upload);
-server.start(router.route, handle);
+handle.set('/', handleStart);
+handle.set('/start', handleStart);
+handle.set('/upload', handleUpload);
+handle.set('/show', handleShow);
+serverStart(router, handle);

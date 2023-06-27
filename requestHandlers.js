@@ -1,6 +1,7 @@
-const querystring = require('querystring');
+import fs from 'fs';
+import formidable from 'formidable';
 
-function start(response, _) {
+function start(response) {
   console.log("Request handler 'start' was called.");
   const body =
     '<!DOCTYPE html>' +
@@ -11,23 +12,52 @@ function start(response, _) {
     '  <title>Document</title>' +
     '</head>' +
     '<body>' +
-    '<form action="/upload" method="post">' +
-    '<textarea name="text" rows="20" cols="60"></textarea>' +
-    '<input type="submit" value="Submit text" />' +
-    '</form>' +
-    '</body>' +
-    '</html>';
+    '<form action="/upload" enctype="multipart/form-data" method="post">' +
+    '<input type="file" name="myFile"/>' +
+    '<button>Upload</button>';
+  '</form>' + '</body>' + '</html>';
   response.writeHead(200, { 'Content-Type': 'text/html' });
   response.write(body);
   response.end();
 }
 
-function upload(response, postData) {
+function upload(response, request) {
   console.log("Request handler 'upload' was called.");
-  response.writeHead(200, { 'Content-Type': 'text/plain' });
-  response.write("You've sent: " + querystring.parse(postData).text);
-  response.end();
+
+  const form = formidable({ uploadDir: './tmp' });
+  console.log('about to parse');
+
+  form.parse(request, (err, fields, files) => {
+    let oldPath = './tmp/' + files.myFile[0].newFilename;
+    let newPath = './tmp/test.png';
+
+    fs.rename(oldPath, newPath, (err) => {
+      if (err) {
+        throw err;
+      }
+      console.log('renamed the file');
+    });
+
+    response.writeHead(200, { 'Content-Type': 'text/html' });
+    response.write('received image:<br/>');
+    response.write("<img src='/show'/>");
+    response.end();
+  });
 }
 
-exports.start = start;
-exports.upload = upload;
+function show(response) {
+  console.log("request handler 'show' was called.");
+  fs.readFile('./tmp/test.png', 'binary', (error, file) => {
+    if (error) {
+      response.writeHead(500, { 'Content-Type': 'text/plain' });
+      response.write(error + '\n');
+      response.end();
+    } else {
+      response.writeHead(200, { 'Content-Type': 'image/png' });
+      response.write(file, 'binary');
+      response.end();
+    }
+  });
+}
+
+export { start, upload, show };
