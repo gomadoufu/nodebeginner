@@ -5,6 +5,7 @@ import {
   upload as handleUpload,
   show as handleShow,
 } from './requestHandlers.js';
+
 const handle = new Map();
 handle.set('/', handleStart);
 handle.set('/start', handleStart);

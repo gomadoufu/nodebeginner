@@ -27,7 +27,7 @@ function upload(response, request) {
   const form = formidable({ uploadDir: './tmp' });
   console.log('about to parse');
 
-  form.parse(request, (err, fields, files) => {
+  form.parse(request, (_err, _fields, files) => {
     let oldPath = './tmp/' + files.myFile[0].newFilename;
     let newPath = './tmp/test.png';
 
@@ -52,11 +52,11 @@ function show(response) {
       response.writeHead(500, { 'Content-Type': 'text/plain' });
       response.write(error + '\n');
       response.end();
-    } else {
-      response.writeHead(200, { 'Content-Type': 'image/png' });
-      response.write(file, 'binary');
-      response.end();
+      return;
     }
+    response.writeHead(200, { 'Content-Type': 'image/png' });
+    response.write(file, 'binary');
+    response.end();
   });
 }
 
